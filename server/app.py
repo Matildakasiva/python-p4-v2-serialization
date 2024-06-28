@@ -20,6 +20,30 @@ def index():
     body = {'message': 'Welcome to the pet directory!'}
     return make_response(body, 200)
 
+#instead of manually creating a pet dictionary, one can use the to_dict() method on the pet instance to generate the dictionary
+@app.route('/pets/<int:id>')
+def pet_by_id(id):
+    pet = Pet.query.filter(Pet.id == id).first()
+
+    if pet:
+        body = pet.to_dict()
+        status = 200
+    else:
+        body = {'message': f'Pet {id} not found.'}
+        status = 404
+
+    return make_response(body, status)
+
+# to_dict() can also be used to create the dictionary for each pet returned when we query by species
+@app.route('/species/<string:species>')
+def pet_by_species(species):
+    pets = []  # array to store a dictionary for each pet
+    for pet in Pet.query.filter_by(species=species).all():
+        pets.append(pet.to_dict())
+    body = {'count': len(pets),
+            'pets': pets
+            }
+    return make_response(body, 200)
 
 if __name__ == '__main__':
     app.run(port=5555, debug=True)
